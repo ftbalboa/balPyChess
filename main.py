@@ -13,8 +13,7 @@ import pieces
 VERSION = 0.001
 
 board = pieces.Board()
-board.print_pieces()
-board.prnt_board()
+board.print_board()
 
 # ************** User Interface ************* #
 window = tkinter.Tk()
