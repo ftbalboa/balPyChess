@@ -10,11 +10,16 @@ class Piece:
         self.name = name
         self.color = color
         self.position = position
+        self.fancy_position = [ROW_NAMES[self.position[0]], COL_NAMES[self.position[1]]]
         self.ifSelect = False
+
+    def set_position(self, position):
+        self.position = position
+        self.fancy_position = [ROW_NAMES[self.position[0]], COL_NAMES[self.position[1]]]
 
     def print_piece_name(self):
         """Console prints piece name color and position"""
-        print(f"{self.name} {self.color} {self.position[0]} {self.position[1]}")
+        print(f"{self.name} {self.color} {self.fancy_position[0]} {self.fancy_position[1]}")
 
 
 class Board:
@@ -22,8 +27,15 @@ class Board:
 
     def __init__(self):
         self.pieces = []
+        self.board = []
         self.rows = 8
         self.cols = 8
+        for row in range(self.rows):
+            for_append =[]
+            for col in range(self.col):
+                for_append.append(None)
+            self.board.append(for_append)
+
         self.__init_position()
 
     def __init_position(self):
@@ -32,7 +44,7 @@ class Board:
                 col = 0
                 row = 0
                 for name in PIECES_ORDER:
-                    self.pieces.append(Piece(name, color, (ROW_NAMES[row], COL_NAMES[col])))
+                    self.pieces.append(Piece(name, color, (row, col)))
                     col += 1
                     if col == self.cols:
                         col = 0
@@ -41,7 +53,7 @@ class Board:
                 row = self.rows - 1
                 col = 0
                 for name in PIECES_ORDER:
-                    self.pieces.append(Piece(name, color, (ROW_NAMES[row], COL_NAMES[col])))
+                    self.pieces.append(Piece(name, color, (row, col)))
                     col += 1
                     if col == self.cols:
                         col = 0
@@ -52,6 +64,13 @@ class Board:
         for piece in self.pieces:
             piece.print_piece_name()
 
+    def print_board(self):
+        for row in range(self.rows):
+            for_append = ''
+            for col in range(self.cols):
+                for_append(f' {self.board[row[col]]}')
+                print(f'{ROW_NAMES[row]}{for_append}')
+        print(' A B C D E F G H')
 
 class Rules:
     def __init__(self, name, color, position):
