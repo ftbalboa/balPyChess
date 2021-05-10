@@ -1,6 +1,8 @@
+from tkinter import *
+
 PIECES_COLORS = ['white', 'black']
-PIECES_ORDER = ['rook', 'horse', 'bishop', 'queen', 'king', 'bishop', 'horse', 'rook',
-                'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn']
+PIECES_ORDER = ['Rook', 'Horse', 'Bishop', 'Queen', 'King', 'Bishop', 'Horse', 'Rook',
+                'Pawn', 'Pawn', 'Pawn', 'Pawn', 'Pawn', 'Pawn', 'Pawn', 'Pawn']
 COL_NAMES = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 ROW_NAMES = ['1', '2', '3', '4', '5', '6', '7', '8']
 
@@ -25,16 +27,22 @@ class Piece:
 class Board:
     """Creates and stocks pieces"""
 
-    def __init__(self):
+    def __init__(self, gui):
         self.pieces = []
         self.board = []
         self.rows = 8
         self.cols = 8
+        self.gui = gui
+        self.offset_x = 0
+        self.offset_y = 0
+        self.side_size = 75
         for row in range(self.rows):
             for_append = []
             for col in range(self.cols):
                 for_append.append(None)
             self.board.append(for_append)
+        self.gui.add_show(url=f'assets/board.gif', priority=1,
+                          position=(self.offset_y, self.offset_x))
         self.__init_position()
 
     def __init_position(self):
@@ -44,7 +52,9 @@ class Board:
                 col = 0
                 row = 0
                 for name in PIECES_ORDER:
-                    self.pieces.append(Piece(name, color, (row, col)))
+                    piece = Piece(name, color, (row, col))
+                    self.gui.add_show(url=f'assets/{piece.color}{piece.name}.png', priority=1, position=self.board_pixel_position(row, col))
+                    self.pieces.append(piece)
                     self.board[row][col] = self.pieces[len(self.pieces) - 1]
                     col += 1
                     if col == self.cols:
@@ -54,7 +64,9 @@ class Board:
                 row = self.rows - 1
                 col = 0
                 for name in PIECES_ORDER:
-                    self.pieces.append(Piece(name, color, (row, col)))
+                    piece = Piece(name, color, (row, col))
+                    self.gui.add_show(url=f'assets/{piece.color}{piece.name}.png', priority=1, position=self.board_pixel_position(row, col))
+                    self.pieces.append(piece)
                     self.board[row][col] = self.pieces[len(self.pieces) - 1]
                     col += 1
                     if col == self.cols:
@@ -77,6 +89,9 @@ class Board:
                     for_append += f' {self.board[row][col].get_piece_name()}'
             print(f'{ROW_NAMES[row]}{for_append}')
         print('   A    B    C    D    E    F    G    H  ')
+
+    def board_pixel_position(self, row, col):
+        return [row * self.side_size + self.offset_y, col * self.side_size + self.offset_x]
 
 
 class Rules:
@@ -101,3 +116,26 @@ class IA:
 
     def next_move(self):
         pass
+
+
+class GUI:
+    def __init__(self):
+        self.window = Tk()
+        self.window.title("balPyChess")
+        self.window.minsize(width=800, height=600)
+        self.canvas = Canvas(bg="grey", width=800, height=600, highlightthickness=0)
+        self.canvas.place(x=0, y=0)
+        self.for_show = []
+
+    def startloop(self):
+        self.window.mainloop()
+
+    def set_bind(self, cb):
+        self.canvas.bind("<Button-1>", cb)
+
+    def add_show(self, url, priority, position):
+        front_image = PhotoImage(file=url)
+        panel = Label(self.window, image=front_image)
+        panel.photo = front_image
+        panel.place(y=position[0], x=position[1])
+        self.for_show.append(panel)
