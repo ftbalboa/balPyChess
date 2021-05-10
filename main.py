@@ -3,7 +3,10 @@ import random
 import pieces
 
 
-# TODO:   Show in display
+# TODO:     Change bg color of the pieces
+#           Gui recives board and update displays (now its backwards)
+#           Handle change of bg piece colors
+
 
 VERSION = 0.001
 

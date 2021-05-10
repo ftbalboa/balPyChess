@@ -1,11 +1,13 @@
 from tkinter import *
+from PIL import Image as Pil_image, ImageTk as Pil_imageTk
 
 PIECES_COLORS = ['white', 'black']
 PIECES_ORDER = ['Rook', 'Horse', 'Bishop', 'Queen', 'King', 'Bishop', 'Horse', 'Rook',
                 'Pawn', 'Pawn', 'Pawn', 'Pawn', 'Pawn', 'Pawn', 'Pawn', 'Pawn']
 COL_NAMES = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 ROW_NAMES = ['1', '2', '3', '4', '5', '6', '7', '8']
-
+B_SQUARES_COLOR ="#A9A9A9"
+W_SQUARES_COLOR ="#EDEDED"
 
 class Piece:
     def __init__(self, name, color, position):  # position in (row col)
@@ -33,8 +35,8 @@ class Board:
         self.rows = 8
         self.cols = 8
         self.gui = gui
-        self.offset_x = 0
-        self.offset_y = 0
+        self.offset_x = 12
+        self.offset_y = 12
         self.side_size = 75
         for row in range(self.rows):
             for_append = []
@@ -42,7 +44,7 @@ class Board:
                 for_append.append(None)
             self.board.append(for_append)
         self.gui.add_show(url=f'assets/board.gif', priority=1,
-                          position=(self.offset_y, self.offset_x))
+                          position=(0, 0))
         self.__init_position()
 
     def __init_position(self):
@@ -123,7 +125,7 @@ class GUI:
         self.window = Tk()
         self.window.title("balPyChess")
         self.window.minsize(width=800, height=600)
-        self.canvas = Canvas(bg="grey", width=800, height=600, highlightthickness=0)
+        self.canvas = Canvas(bg="grey", width=800, height=600, highlightthickness=0,bd=0)
         self.canvas.place(x=0, y=0)
         self.for_show = []
 
@@ -134,8 +136,9 @@ class GUI:
         self.canvas.bind("<Button-1>", cb)
 
     def add_show(self, url, priority, position):
-        front_image = PhotoImage(file=url)
+        front_image = Pil_imageTk.PhotoImage(image=Pil_image.open(url))
         panel = Label(self.window, image=front_image)
+        panel.config(bg=B_SQUARES_COLOR)
         panel.photo = front_image
         panel.place(y=position[0], x=position[1])
         self.for_show.append(panel)
