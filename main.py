@@ -3,16 +3,16 @@ import random
 import pieces
 
 
-# TODO:     Change bg color of the pieces
-#           Gui recives board and update displays (now its backwards)
-#           Handle change of bg piece colors
+# TODO:     Select piece
+#           make callback function
 
 
 VERSION = 0.001
 
-gui = pieces.GUI()
-board = pieces.Board(gui)
-board.print_board()
+board = pieces.Board()
+gui = pieces.GUI(board)
+
+
 
 # def callback(event):
 #     print("click")
