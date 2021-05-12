@@ -16,7 +16,7 @@ class Piece:
         self.color = color
         self.position = position
         self.fancy_position = [ROW_NAMES[self.position[0]], COL_NAMES[self.position[1]]]
-        self.ifSelect = False
+        self.if_select = False
         self.offset = 12
 
     def set_position(self, position):
@@ -29,6 +29,9 @@ class Piece:
 
     def get_position(self):
         return self.position
+
+    def set_select(self, select):
+        self.if_select = select
 
 
 class Board:
@@ -110,17 +113,28 @@ class Board:
         else:
             return W_SQUARES_COLOR
 
+    def get_square(self,pixels):
+        col = pixels[0]
+        row = pixels[1]
+        col = col // self.side_size
+        row = row // self.side_size
+        return [col, row]
 
 
 class Rules:
-    def __init__(self, name, color, position):
-        pass
+    def __init__(self, board):
+        self.board = board
 
     def is_check(self):
         pass
 
     def possible_movs(self):
         pass
+
+    def select_piece(self, event):
+        print(event)
+        print(f"x = {event.x} y = {event.y} pos = {self.board.get_square((event.x,event.y))} widget = {event.widget}")
+
 
 
 class GamePanel:
@@ -154,7 +168,8 @@ class GUI:
         self.window.mainloop()
 
     def set_bind(self, cb):
-        self.canvas.bind("<Button-1>", cb)
+        for label in self.for_show:
+            label.bind("<Button-1>", cb)
 
     def add_show(self, url, priority, position, square_color='white'):
         front_image = Pil_imageTk.PhotoImage(image=Pil_image.open(url))
@@ -165,7 +180,7 @@ class GUI:
         self.for_show.append(panel)
 
     def charge_board(self):
-        self.add_show(url=f'assets/board.gif', priority=1, position=(0, 0))
+        self.add_show(url=f'assets/board.gif', priority=0, position=(0, 0))
         for row in self.board.get_board():
             for piece in row:
                 if piece is not None:
