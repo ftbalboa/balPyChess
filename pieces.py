@@ -18,6 +18,7 @@ class Piece:
         self.fancy_position = [ROW_NAMES[self.position[0]], COL_NAMES[self.position[1]]]
         self.if_select = False
         self.offset = 12
+        self.label = ""
 
     def set_position(self, position):
         self.position = position
@@ -33,6 +34,21 @@ class Piece:
     def set_select(self, select):
         self.if_select = select
 
+    def set_label(self, label):
+        self.label = label
+
+    def get_label(self):
+        return self.label
+
+    def get_if_select(self):
+        return self.if_select
+
+    def set_if_select(self, select):
+        self.if_select = select
+
+    def get_color(self):
+        return self.color
+
 
 class Board:
     """Creates and stocks pieces"""
@@ -45,6 +61,7 @@ class Board:
         self.offset_x = 12
         self.offset_y = 12
         self.side_size = 75
+        self.label = []
         for row in range(self.rows):
             for_append = []
             for col in range(self.cols):
@@ -113,17 +130,28 @@ class Board:
         else:
             return W_SQUARES_COLOR
 
-    def get_square(self,pixels):
+    def get_square(self, pixels):
         col = pixels[0]
         row = pixels[1]
         col = col // self.side_size
         row = row // self.side_size
         return [col, row]
 
+    def get_pieces(self):
+        return self.pieces
 
-class Rules:
+    def set_label(self, label):
+        self.label = label
+
+    def get_label(self):
+        return self.label
+
+
+class Game:
     def __init__(self, board):
         self.board = board
+        self.selected = False
+        self.turn = PIECES_COLORS[0]
 
     def is_check(self):
         pass
@@ -132,14 +160,20 @@ class Rules:
         pass
 
     def select_piece(self, event):
-        print(event)
-        print(f"x = {event.x} y = {event.y} pos = {self.board.get_square((event.x,event.y))} widget = {event.widget}")
+        if self.board.get_label() is event.widget:
+            pass
+        else:
+            for piece in self.board.get_pieces():
+                if piece.get_label() is event.widget:
+                    if piece.get_color() is self.turn:
+                        self.deselect_all()
+                        piece.set_if_select(True)
+                        self.selected = True
+                        print(piece.name)
 
-
-
-class GamePanel:
-    def __init__(self):
-        self.start = False
+    def deselect_all(self):
+        for piece in self.board.get_pieces():
+            piece.set_if_select(False)
 
 
 class IA:
@@ -168,8 +202,7 @@ class GUI:
         self.window.mainloop()
 
     def set_bind(self, cb):
-        for label in self.for_show:
-            label.bind("<Button-1>", cb)
+        self.window.bind("<Button-1>", cb)
 
     def add_show(self, url, priority, position, square_color='white'):
         front_image = Pil_imageTk.PhotoImage(image=Pil_image.open(url))
@@ -177,13 +210,13 @@ class GUI:
         panel.config(bg=square_color)
         panel.photo = front_image
         panel.place(y=position[0], x=position[1])
-        self.for_show.append(panel)
+        return panel
 
     def charge_board(self):
-        self.add_show(url=f'assets/board.gif', priority=0, position=(0, 0))
+        self.board.set_label(self.add_show(url=f'assets/board.gif', priority=0, position=(0, 0)))
         for row in self.board.get_board():
             for piece in row:
                 if piece is not None:
-                    self.add_show(url=f'assets/{piece.color}{piece.name}.png', priority=1,
-                                  position=self.board.board_pixel_position(piece.get_position()),
-                                  square_color=self.board.get_square_color(piece.get_position()))
+                    piece.set_label(self.add_show(url=f'assets/{piece.color}{piece.name}.png', priority=1,
+                                                  position=self.board.board_pixel_position(piece.get_position()),
+                                                  square_color=self.board.get_square_color(piece.get_position())))

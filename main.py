@@ -3,17 +3,16 @@ import random
 import pieces
 
 
-# TODO:     Select piece
-#           make callback function
-#           match labels with pieces
+# TODO:     Add images for "piece select", "possible move" and "piece in danger"
+#           make function "possible moves"
 
 
 VERSION = 0.001
 
 board = pieces.Board()
 gui = pieces.GUI(board)
-rules = pieces.Rules(board)
-gui.set_bind(rules.select_piece)
+game = pieces.Game(board)
+gui.set_bind(game.select_piece)
 
 
 # def callback(event):
