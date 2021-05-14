@@ -113,8 +113,11 @@ class Board:
             print(f'{ROW_NAMES[row]}{for_append}')
         print('   A    B    C    D    E    F    G    H  ')
 
-    def board_pixel_position(self, pos):
-        return [pos[0] * self.side_size + self.offset_y, pos[1] * self.side_size + self.offset_x]
+    def board_pixel_position(self, pos, absolute=False):
+        if absolute:
+            return [pos[0] * self.side_size, pos[1] * self.side_size]
+        else:
+            return [pos[0] * self.side_size + self.offset_y, pos[1] * self.side_size + self.offset_x]
 
     def get_board(self):
         return self.board
@@ -175,7 +178,10 @@ class Game:
                         self.deselect_all()
                         piece.set_if_select(True)
                         self.selected = True
-                        self.gui.place_label(self.select_item.get_label(), piece.get_position())
+                        self.gui.place_label(self.select_item.get_label(),
+                                             self.board.board_pixel_position(piece.get_position(), True),
+                                             piece
+                                             )
                         print(piece.name)
 
     def deselect_all(self):
@@ -206,6 +212,7 @@ class Items:
 
 class GUI:
     def __init__(self, board, board_x=0, board_y=0, board_square=75):
+        self.N_PRIORITY = 3
         self.window = Tk()
         self.window.title("balPyChess")
         self.window.minsize(width=800, height=600)
@@ -243,5 +250,8 @@ class GUI:
     def hide_label(self, label):
         label.place_forget()
 
-    def place_label(self, label, position):
+    def place_label(self, label, position, piece):
         label.place(y=position[0], x=position[1])
+        piece.set_label(self.add_show(url=f'assets/{piece.color}{piece.name}.png', priority=1,
+                                                  position=self.board.board_pixel_position(piece.get_position()),
+                                                  square_color=self.board.get_square_color(piece.get_position())))
