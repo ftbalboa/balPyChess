@@ -11,6 +11,15 @@ W_SQUARES_COLOR = "#EDEDED"
 IMG_SELECT = 'assets/select.png'
 IMG_MOV = 'assets/posMove.png'
 
+DIC_MOV = {"Rook": [(0, 'I'), ('I', 0)],  # (row col) Keywords: I (de 0 a Infinito),Primer (solo primer movimiento), Come (solo para comer)
+           "Horse": [(1, -2), (2, -1), (2, 1), (1, 2), (-1, 2), (-2, 1), (-2, -1), (-1, -2)],
+           "Bishop": [('I', 'I')],
+           "Queen": [(0, 'I'), ('I', 0), ('I', 'I')],
+           "King": [(1, 0), (0, 1), (1, 1), (-1, 0), (0, -1), (-1, -1), (-1, 1), (1, -1)],
+           "Pawn": [(1, 0), ('Primer', 2, 0), ('Come', 1, 1), ('Come', 1, -1)],
+           }
+
+
 class Piece:
     def __init__(self, name, color, position):  # position in (row col)
         self.name = name
@@ -253,5 +262,5 @@ class GUI:
     def place_label(self, label, position, piece):
         label.place(y=position[0], x=position[1])
         piece.set_label(self.add_show(url=f'assets/{piece.color}{piece.name}.png', priority=1,
-                                                  position=self.board.board_pixel_position(piece.get_position()),
-                                                  square_color=self.board.get_square_color(piece.get_position())))
+                                      position=self.board.board_pixel_position(piece.get_position()),
+                                      square_color=self.board.get_square_color(piece.get_position())))
