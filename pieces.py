@@ -8,7 +8,8 @@ COL_NAMES = ['H', 'G', 'C', 'E', 'D', 'C', 'B', 'A']
 ROW_NAMES = ['1', '2', '3', '4', '5', '6', '7', '8']
 B_SQUARES_COLOR = "#A9A9A9"
 W_SQUARES_COLOR = "#EDEDED"
-
+IMG_SELECT = 'assets/select.png'
+IMG_MOV = 'assets/posMove.png'
 
 class Piece:
     def __init__(self, name, color, position):  # position in (row col)
@@ -148,10 +149,15 @@ class Board:
 
 
 class Game:
-    def __init__(self, board):
+    def __init__(self, gui, board):
+        self.gui = gui
         self.board = board
         self.selected = False
         self.turn = PIECES_COLORS[0]
+        self.gui.set_bind(self.select_piece)
+        self.select_item = Items("select", (0, 0))
+        self.select_item.set_label(self.gui.add_show(IMG_SELECT, 2, (0, 0)))
+        self.gui.hide_label(self.select_item.get_label())
 
     def is_check(self):
         pass
@@ -169,6 +175,7 @@ class Game:
                         self.deselect_all()
                         piece.set_if_select(True)
                         self.selected = True
+                        self.gui.place_label(self.select_item.get_label(), piece.get_position())
                         print(piece.name)
 
     def deselect_all(self):
@@ -184,6 +191,19 @@ class IA:
         pass
 
 
+class Items:
+    def __init__(self, name, pos):
+        self.name = name
+        self.pos = pos
+        self.label = ""
+
+    def set_label(self, label):
+        self.label = label
+
+    def get_label(self):
+        return self.label
+
+
 class GUI:
     def __init__(self, board, board_x=0, board_y=0, board_square=75):
         self.window = Tk()
@@ -191,7 +211,6 @@ class GUI:
         self.window.minsize(width=800, height=600)
         self.canvas = Canvas(bg="grey", width=800, height=600, highlightthickness=0, bd=0)
         self.canvas.place(x=0, y=0)
-        self.for_show = []
         self.board = board
         self.board_x = board_x
         self.board_y = board_y
@@ -220,3 +239,9 @@ class GUI:
                     piece.set_label(self.add_show(url=f'assets/{piece.color}{piece.name}.png', priority=1,
                                                   position=self.board.board_pixel_position(piece.get_position()),
                                                   square_color=self.board.get_square_color(piece.get_position())))
+
+    def hide_label(self, label):
+        label.place_forget()
+
+    def place_label(self, label, position):
+        label.place(y=position[0], x=position[1])
