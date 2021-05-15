@@ -2,7 +2,7 @@ from tkinter import *
 from PIL import Image as Pil_image, ImageTk as Pil_imageTk
 
 PIECES_COLORS = ['white', 'black']
-PIECES_ORDER = ['Rook', 'Horse', 'Bishop', 'King', 'Queen', 'Bishop', 'Horse', 'Rook',
+PIECES_ORDER = ['Rook', 'Horse', 'Bishop', 'Queen', 'King', 'Bishop', 'Horse', 'Rook',
                 'Pawn', 'Pawn', 'Pawn', 'Pawn', 'Pawn', 'Pawn', 'Pawn', 'Pawn']
 COL_NAMES = ['H', 'G', 'C', 'E', 'D', 'C', 'B', 'A']
 ROW_NAMES = ['1', '2', '3', '4', '5', '6', '7', '8']
@@ -16,7 +16,7 @@ DIC_MOV = {"Rook": [(0, 'I'), ('I', 0)],  # (row col) Keywords: I (de 0 a Infini
            "Bishop": [('I', 'I')],
            "Queen": [(0, 'I'), ('I', 0), ('I', 'I')],
            "King": [(1, 0), (0, 1), (1, 1), (-1, 0), (0, -1), (-1, -1), (-1, 1), (1, -1)],
-           "Pawn": [(1, 0), ('Primer', 2, 0), ('Come', 1, 1), ('Come', 1, -1)],
+           "Pawn": [(1, 0), ('Primer', 2, 0), ('Come', 1, 1), ('Come', 1, -1), ('Alpaso', 1, 1), ('Alpaso', 1, -1)],
            }
 
 
@@ -34,7 +34,7 @@ class Piece:
         self.position = position
         self.fancy_position = [ROW_NAMES[self.position[0]], COL_NAMES[self.position[1]]]
 
-    def get_piece_name(self):
+    def get_name_color(self):
         """Console prints piece name and color"""
         return f"{self.name} {self.color}"
 
@@ -58,6 +58,9 @@ class Piece:
 
     def get_color(self):
         return self.color
+
+    def get_name(self):
+        return self.name
 
 
 class Board:
@@ -108,7 +111,7 @@ class Board:
     def print_pieces(self):
         """Console prints all pieces name color and position"""
         for piece in self.pieces:
-            print(piece.get_piece_name())
+            print(piece.get_name_color())
 
     def print_board(self):
         """Prints on console full board"""
@@ -176,10 +179,16 @@ class Game:
     def is_check(self):
         pass
 
-    def possible_movs(self):
+    def possible_movs(self, piece):
         forReturn = []
-        forReturn.append((3, 3))
-        forReturn.append((2, 3))
+        for mov in DIC_MOV[piece.get_name()]:
+            if len(mov) == 2:
+                if isinstance(mov[0], int) and isinstance(mov[1], int):
+                    pos = piece.get_position()
+                    new_mov = (mov[0] + pos[0], mov[1] + pos[1])
+                    if 8 > new_mov[0] > -1 and 8 > new_mov[1] > -1:
+                        forReturn.append(new_mov)
+        print(forReturn)
         return forReturn
 
     def select_piece(self, event):
@@ -196,17 +205,18 @@ class Game:
                                              self.board.pixel_position(piece.get_position(), True),
                                              piece)
                         print(piece.name)
-                        self.mov_img(self.possible_movs())
+                        self.mov_img(self.possible_movs(piece))
 
     def deselect_all(self):
         for piece in self.board.get_pieces():
             piece.set_if_select(False)
 
     def mov_img(self, movs):
+        for mov in self.movs:
+            self.gui.hide_label(mov.get_label())
         self.movs = []
         for mov in movs:
             new_mov = Items("poss", mov)
-            print(mov)
             new_mov.set_label(self.gui.add_show(IMG_MOV, 2, self.board.pixel_position(mov, offset=(10, 10)),square_color=self.board.get_square_color(mov)))
             self.movs.append(new_mov)
 
