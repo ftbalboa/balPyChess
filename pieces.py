@@ -2,7 +2,7 @@ from tkinter import *
 from PIL import Image as Pil_image, ImageTk as Pil_imageTk
 
 PIECES_COLORS = ['white', 'black']
-PIECES_ORDER = ['Rook', 'Horse', 'Bishop', 'Queen', 'King', 'Bishop', 'Horse', 'Rook',
+PIECES_ORDER = ['Rook', 'Horse', 'Bishop', 'King', 'Queen', 'Bishop', 'Horse', 'Rook',
                 'Pawn', 'Pawn', 'Pawn', 'Pawn', 'Pawn', 'Pawn', 'Pawn', 'Pawn']
 COL_NAMES = ['H', 'G', 'C', 'E', 'D', 'C', 'B', 'A']
 ROW_NAMES = ['1', '2', '3', '4', '5', '6', '7', '8']
@@ -84,18 +84,7 @@ class Board:
         for color in PIECES_COLORS:
             if color == "white":
                 col = 0
-                row = self.rows - 1
-                for name in PIECES_ORDER:
-                    piece = Piece(name, color, (row, col))
-                    self.pieces.append(piece)
-                    self.board[row][col] = self.pieces[len(self.pieces) - 1]
-                    col += 1
-                    if col == self.cols:
-                        col = 0
-                        row -= 1
-            if color == "black":
                 row = 0
-                col = 0
                 for name in PIECES_ORDER:
                     piece = Piece(name, color, (row, col))
                     self.pieces.append(piece)
@@ -104,6 +93,17 @@ class Board:
                     if col == self.cols:
                         col = 0
                         row += 1
+            if color == "black":
+                row = self.rows - 1
+                col = 0
+                for name in PIECES_ORDER:
+                    piece = Piece(name, color, (row, col))
+                    self.pieces.append(piece)
+                    self.board[row][col] = self.pieces[len(self.pieces) - 1]
+                    col += 1
+                    if col == self.cols:
+                        col = 0
+                        row -= 1
 
     def print_pieces(self):
         """Console prints all pieces name color and position"""
@@ -122,11 +122,12 @@ class Board:
             print(f'{ROW_NAMES[row]}{for_append}')
         print('   A    B    C    D    E    F    G    H  ')
 
-    def board_pixel_position(self, pos, absolute=False):
+    def pixel_position(self, position, absolute=False, offset=[0,0]):
+        pos = [7 - position[0], position[1]]
         if absolute:
             return [pos[0] * self.side_size, pos[1] * self.side_size]
         else:
-            return [pos[0] * self.side_size + self.offset_y, pos[1] * self.side_size + self.offset_x]
+            return [pos[0] * self.side_size + self.offset_y + offset[0], pos[1] * self.side_size + self.offset_x + offset[1]]
 
     def get_board(self):
         return self.board
@@ -139,9 +140,9 @@ class Board:
         else:
             pos = col
         if pos % 2 == 0:
-            return B_SQUARES_COLOR
-        else:
             return W_SQUARES_COLOR
+        else:
+            return B_SQUARES_COLOR
 
     def get_square(self, pixels):
         col = pixels[0]
@@ -169,13 +170,17 @@ class Game:
         self.gui.set_bind(self.select_piece)
         self.select_item = Items("select", (0, 0))
         self.select_item.set_label(self.gui.add_show(IMG_SELECT, 2, (0, 0)))
+        self.movs = []
         self.gui.hide_label(self.select_item.get_label())
 
     def is_check(self):
         pass
 
     def possible_movs(self):
-        pass
+        forReturn = []
+        forReturn.append((3, 3))
+        forReturn.append((2, 3))
+        return forReturn
 
     def select_piece(self, event):
         if self.board.get_label() is event.widget:
@@ -188,14 +193,22 @@ class Game:
                         piece.set_if_select(True)
                         self.selected = True
                         self.gui.place_label(self.select_item.get_label(),
-                                             self.board.board_pixel_position(piece.get_position(), True),
-                                             piece
-                                             )
+                                             self.board.pixel_position(piece.get_position(), True),
+                                             piece)
                         print(piece.name)
+                        self.mov_img(self.possible_movs())
 
     def deselect_all(self):
         for piece in self.board.get_pieces():
             piece.set_if_select(False)
+
+    def mov_img(self, movs):
+        self.movs = []
+        for mov in movs:
+            new_mov = Items("poss", mov)
+            print(mov)
+            new_mov.set_label(self.gui.add_show(IMG_MOV, 2, self.board.pixel_position(mov, offset=(10, 10)),square_color=self.board.get_square_color(mov)))
+            self.movs.append(new_mov)
 
 
 class IA:
@@ -253,7 +266,7 @@ class GUI:
             for piece in row:
                 if piece is not None:
                     piece.set_label(self.add_show(url=f'assets/{piece.color}{piece.name}.png', priority=1,
-                                                  position=self.board.board_pixel_position(piece.get_position()),
+                                                  position=self.board.pixel_position(piece.get_position()),
                                                   square_color=self.board.get_square_color(piece.get_position())))
 
     def hide_label(self, label):
@@ -262,5 +275,5 @@ class GUI:
     def place_label(self, label, position, piece):
         label.place(y=position[0], x=position[1])
         piece.set_label(self.add_show(url=f'assets/{piece.color}{piece.name}.png', priority=1,
-                                      position=self.board.board_pixel_position(piece.get_position()),
+                                      position=self.board.pixel_position(piece.get_position()),
                                       square_color=self.board.get_square_color(piece.get_position())))
