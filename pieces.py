@@ -11,7 +11,8 @@ W_SQUARES_COLOR = "#EDEDED"
 IMG_SELECT = 'assets/select.png'
 IMG_MOV = 'assets/posMove.png'
 
-DIC_MOV = {"Rook": [(0, 'I'), ('I', 0)],  # (row col) Keywords: I (de 0 a Infinito),Primer (solo primer movimiento), Come (solo para comer)
+DIC_MOV = {"Rook": [(0, 'I'), ('I', 0)],
+           # (row col) Keywords: I (de 0 a Infinito),Primer (solo primer movimiento), Come (solo para comer)
            "Horse": [(1, -2), (2, -1), (2, 1), (1, 2), (-1, 2), (-2, 1), (-2, -1), (-1, -2)],
            "Bishop": [('I', 'I')],
            "Queen": [(0, 'I'), ('I', 0), ('I', 'I')],
@@ -29,6 +30,7 @@ class Piece:
         self.if_select = False
         self.offset = 12
         self.label = ""
+        self.never_move = True
 
     def set_position(self, position):
         self.position = position
@@ -61,6 +63,12 @@ class Piece:
 
     def get_name(self):
         return self.name
+
+    def get_never_move(self):
+        return self.never_move
+
+    def set_never_move(self, never_move):
+        self.never_move = never_move
 
 
 class Board:
@@ -125,12 +133,13 @@ class Board:
             print(f'{ROW_NAMES[row]}{for_append}')
         print('   A    B    C    D    E    F    G    H  ')
 
-    def pixel_position(self, position, absolute=False, offset=[0,0]):
+    def pixel_position(self, position, absolute=False, offset=[0, 0]):
         pos = [7 - position[0], position[1]]
         if absolute:
             return [pos[0] * self.side_size, pos[1] * self.side_size]
         else:
-            return [pos[0] * self.side_size + self.offset_y + offset[0], pos[1] * self.side_size + self.offset_x + offset[1]]
+            return [pos[0] * self.side_size + self.offset_y + offset[0],
+                    pos[1] * self.side_size + self.offset_x + offset[1]]
 
     def get_board(self):
         return self.board
@@ -163,6 +172,9 @@ class Board:
     def get_label(self):
         return self.label
 
+    def get_n_rows(self):
+        return self.rows
+
 
 class Game:
     def __init__(self, gui, board):
@@ -181,13 +193,90 @@ class Game:
 
     def possible_movs(self, piece):
         forReturn = []
-        for mov in DIC_MOV[piece.get_name()]:
+        pos = piece.get_position()
+        for mov in DIC_MOV[piece.get_name()]:  # movimientos simples o unitarios
             if len(mov) == 2:
                 if isinstance(mov[0], int) and isinstance(mov[1], int):
-                    pos = piece.get_position()
                     new_mov = (mov[0] + pos[0], mov[1] + pos[1])
-                    if 8 > new_mov[0] > -1 and 8 > new_mov[1] > -1:
-                        forReturn.append(new_mov)
+                    if new_mov[0] < self.board.get_n_rows() and new_mov[1] < self.board.get_n_rows():
+                        if self.board.get_board()[new_mov[0]][new_mov[1]] is not None:
+                            if self.board.get_board()[new_mov[0]][new_mov[1]].get_color() == piece.get_color():
+                                pass
+                            else:
+                                pass
+                        elif 8 > new_mov[0] > -1 and 8 > new_mov[1] > -1:
+                            forReturn.append(new_mov)
+                else:
+                    # Verticales
+                    for i in range(2):
+                        if i == 0:
+                            a = 1
+                        else:
+                            a = -1
+                        for j in range(1, self.board.get_n_rows()):
+                            if mov[0] == 'I' and mov[1] == 0:
+                                new_mov = (j * a + pos[0], pos[1])
+                                if new_mov[0] < self.board.get_n_rows() and new_mov[1] < self.board.get_n_rows():
+                                    if self.board.get_board()[new_mov[0]][new_mov[1]] is not None:
+                                        if self.board.get_board()[new_mov[0]][new_mov[1]].get_color() == piece.get_color():
+                                            break
+                                        else:
+                                            break
+                                if 8 > new_mov[0] > -1 and 8 > new_mov[1] > -1:
+                                    forReturn.append(new_mov)
+                        for j in range(1, self.board.get_n_rows()):
+                            if mov[0] == 0 and mov[1] == 'I':
+                                new_mov = (pos[0], pos[1] + j * a)
+                                if new_mov[0] < self.board.get_n_rows() and new_mov[1] < self.board.get_n_rows():
+                                    if self.board.get_board()[new_mov[0]][new_mov[1]] is not None:
+                                        if self.board.get_board()[new_mov[0]][new_mov[1]].get_color() == piece.get_color():
+                                            break
+                                        else:
+                                            break
+                                if 8 > new_mov[0] > -1 and 8 > new_mov[1] > -1:
+                                    forReturn.append(new_mov)
+                    # Diagonales
+                    for i in range(2):
+                        if i == 0:
+                            a = 1
+                        else:
+                            a = -1
+                        for j in range(1, self.board.get_n_rows()):
+                            if mov[0] == 'I' and mov[1] == 'I':
+                                new_mov = (j * a + pos[0], pos[1] + j)
+                                if new_mov[0] < self.board.get_n_rows() and new_mov[1] < self.board.get_n_rows():
+                                    if self.board.get_board()[new_mov[0]][new_mov[1]] is not None:
+                                        if self.board.get_board()[new_mov[0]][new_mov[1]].get_color() == piece.get_color():
+                                            break
+                                        else:
+                                            break
+                                if 8 > new_mov[0] > -1 and 8 > new_mov[1] > -1:
+                                    forReturn.append(new_mov)
+                        for j in range(1, self.board.get_n_rows()):
+                            if mov[0] == 'I' and mov[1] == 'I':
+                                new_mov = (j * a + pos[0], pos[1] - j)
+                                if new_mov[0] < self.board.get_n_rows() and new_mov[1] < self.board.get_n_rows():
+                                    if self.board.get_board()[new_mov[0]][new_mov[1]] is not None:
+                                        if self.board.get_board()[new_mov[0]][new_mov[1]].get_color() == piece.get_color():
+                                            break
+                                        else:
+                                            break
+                                if 8 > new_mov[0] > -1 and 8 > new_mov[1] > -1:
+                                    forReturn.append(new_mov)
+            elif len(mov) == 3:
+                if mov[0] == 'Primer':
+                    if piece.get_never_move():
+                        if isinstance(mov[1], int) and isinstance(mov[2], int):
+                            pos = piece.get_position()
+                            new_mov = (mov[1] + pos[0], mov[2] + pos[1])
+                            if new_mov[0] < self.board.get_n_rows() and new_mov[1] < self.board.get_n_rows():
+                                if self.board.get_board()[new_mov[0]][new_mov[1]] is not None:
+                                    if self.board.get_board()[new_mov[0]][new_mov[1]].get_color() == piece.get_color():
+                                        pass
+                                    else:
+                                        pass
+                                elif 8 > new_mov[0] > -1 and 8 > new_mov[1] > -1:
+                                    forReturn.append(new_mov)
         print(forReturn)
         return forReturn
 
@@ -217,7 +306,8 @@ class Game:
         self.movs = []
         for mov in movs:
             new_mov = Items("poss", mov)
-            new_mov.set_label(self.gui.add_show(IMG_MOV, 2, self.board.pixel_position(mov, offset=(10, 10)),square_color=self.board.get_square_color(mov)))
+            new_mov.set_label(self.gui.add_show(IMG_MOV, 2, self.board.pixel_position(mov, offset=(10, 10)),
+                                                square_color=self.board.get_square_color(mov)))
             self.movs.append(new_mov)
 
 
