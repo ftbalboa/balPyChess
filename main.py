@@ -3,11 +3,10 @@ import random
 import pieces
 
 
-# TODO:         make function "possible moves"
-#                   add threats
-#                   add exclusions for pawns
+# TODO:         in function "possible moves"
 #                   add al paso threats for pawn
-#                   return dicc with threats and moves
+#               add function move
+#               add function eat
 
 
 VERSION = 0.001

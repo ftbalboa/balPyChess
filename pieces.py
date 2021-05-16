@@ -191,8 +191,9 @@ class Game:
     def is_check(self):
         pass
 
-    def possible_movs(self, piece):
+    def possible_movs(self, piece, mov_or_threat):
         forReturn = []
+        threats = []
         pos = piece.get_position()
         for mov in DIC_MOV[piece.get_name()]:  # movimientos simples o unitarios
             if len(mov) == 2:
@@ -202,8 +203,8 @@ class Game:
                         if self.board.get_board()[new_mov[0]][new_mov[1]] is not None:
                             if self.board.get_board()[new_mov[0]][new_mov[1]].get_color() == piece.get_color():
                                 pass
-                            else:
-                                pass
+                            elif 8 > new_mov[0] > -1 and 8 > new_mov[1] > -1 and piece.get_name != 'Pawn':
+                                threats.append(new_mov)
                         elif 8 > new_mov[0] > -1 and 8 > new_mov[1] > -1:
                             forReturn.append(new_mov)
                 else:
@@ -220,7 +221,8 @@ class Game:
                                     if self.board.get_board()[new_mov[0]][new_mov[1]] is not None:
                                         if self.board.get_board()[new_mov[0]][new_mov[1]].get_color() == piece.get_color():
                                             break
-                                        else:
+                                        elif 8 > new_mov[0] > -1 and 8 > new_mov[1] > -1:
+                                            threats.append(new_mov)
                                             break
                                 if 8 > new_mov[0] > -1 and 8 > new_mov[1] > -1:
                                     forReturn.append(new_mov)
@@ -231,7 +233,8 @@ class Game:
                                     if self.board.get_board()[new_mov[0]][new_mov[1]] is not None:
                                         if self.board.get_board()[new_mov[0]][new_mov[1]].get_color() == piece.get_color():
                                             break
-                                        else:
+                                        elif 8 > new_mov[0] > -1 and 8 > new_mov[1] > -1:
+                                            threats.append(new_mov)
                                             break
                                 if 8 > new_mov[0] > -1 and 8 > new_mov[1] > -1:
                                     forReturn.append(new_mov)
@@ -248,7 +251,8 @@ class Game:
                                     if self.board.get_board()[new_mov[0]][new_mov[1]] is not None:
                                         if self.board.get_board()[new_mov[0]][new_mov[1]].get_color() == piece.get_color():
                                             break
-                                        else:
+                                        elif 8 > new_mov[0] > -1 and 8 > new_mov[1] > -1:
+                                            threats.append(new_mov)
                                             break
                                 if 8 > new_mov[0] > -1 and 8 > new_mov[1] > -1:
                                     forReturn.append(new_mov)
@@ -259,7 +263,8 @@ class Game:
                                     if self.board.get_board()[new_mov[0]][new_mov[1]] is not None:
                                         if self.board.get_board()[new_mov[0]][new_mov[1]].get_color() == piece.get_color():
                                             break
-                                        else:
+                                        elif 8 > new_mov[0] > -1 and 8 > new_mov[1] > -1:
+                                            threats.append(new_mov)
                                             break
                                 if 8 > new_mov[0] > -1 and 8 > new_mov[1] > -1:
                                     forReturn.append(new_mov)
@@ -271,14 +276,15 @@ class Game:
                             new_mov = (mov[1] + pos[0], mov[2] + pos[1])
                             if new_mov[0] < self.board.get_n_rows() and new_mov[1] < self.board.get_n_rows():
                                 if self.board.get_board()[new_mov[0]][new_mov[1]] is not None:
-                                    if self.board.get_board()[new_mov[0]][new_mov[1]].get_color() == piece.get_color():
-                                        pass
-                                    else:
-                                        pass
+                                    pass
                                 elif 8 > new_mov[0] > -1 and 8 > new_mov[1] > -1:
                                     forReturn.append(new_mov)
-        print(forReturn)
-        return forReturn
+        if mov_or_threat == 'mov':
+            return forReturn
+        elif mov_or_threat == 'threat':
+            return threats
+        else:
+            return [forReturn, threats]
 
     def select_piece(self, event):
         if self.board.get_label() is event.widget:
@@ -293,8 +299,7 @@ class Game:
                         self.gui.place_label(self.select_item.get_label(),
                                              self.board.pixel_position(piece.get_position(), True),
                                              piece)
-                        print(piece.name)
-                        self.mov_img(self.possible_movs(piece))
+                        self.mov_img(self.possible_movs(piece, 'mov'))
 
     def deselect_all(self):
         for piece in self.board.get_pieces():
