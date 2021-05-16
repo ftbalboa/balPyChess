@@ -32,6 +32,7 @@ class Piece:
         self.label = ""
         self.never_move = True
 
+
     def set_position(self, position):
         self.position = position
         self.fancy_position = [ROW_NAMES[self.position[0]], COL_NAMES[self.position[1]]]
@@ -129,7 +130,7 @@ class Board:
                 if self.board[row][col] is None:
                     for_append += f' {self.board[row][col]}'
                 else:
-                    for_append += f' {self.board[row][col].get_piece_name()}'
+                    for_append += f' {self.board[row][col].get_name()}'
             print(f'{ROW_NAMES[row]}{for_append}')
         print('   A    B    C    D    E    F    G    H  ')
 
@@ -140,6 +141,12 @@ class Board:
         else:
             return [pos[0] * self.side_size + self.offset_y + offset[0],
                     pos[1] * self.side_size + self.offset_x + offset[1]]
+
+    def mov(self, piece, pos):
+        old_pos = piece.get_position()
+        self.board[old_pos[0]][old_pos[1]] = None
+        self.board[pos[0]][pos[1]] = piece
+        piece.set_position(pos)
 
     def get_board(self):
         return self.board
@@ -187,6 +194,7 @@ class Game:
         self.select_item.set_label(self.gui.add_show(IMG_SELECT, 2, (0, 0)))
         self.movs = []
         self.gui.hide_label(self.select_item.get_label())
+        self.piece_selected = ""
 
     def is_check(self):
         pass
@@ -300,10 +308,22 @@ class Game:
                                              self.board.pixel_position(piece.get_position(), True),
                                              piece)
                         self.mov_img(self.possible_movs(piece, 'mov'))
+                        self.piece_selected = piece
+            for mov in self.movs:
+                if mov.get_label() is event.widget:
+                    piece = self.piece_selected
+                    self.deselect_all()
+                    self.board.mov(piece, mov.get_pos())
+                    self.gui.update_piece(piece)
 
     def deselect_all(self):
+        self.gui.hide_label(self.select_item.get_label())
         for piece in self.board.get_pieces():
             piece.set_if_select(False)
+        for mov in self.movs:
+            self.gui.hide_label(mov.get_label())
+        self.movs = []
+        self.piece_selected = ""
 
     def mov_img(self, movs):
         for mov in self.movs:
@@ -335,6 +355,9 @@ class Items:
 
     def get_label(self):
         return self.label
+
+    def get_pos(self):
+        return self.pos
 
 
 class GUI:
@@ -379,6 +402,13 @@ class GUI:
 
     def place_label(self, label, position, piece):
         label.place(y=position[0], x=position[1])
+        piece.get_label().destroy()
+        piece.set_label(self.add_show(url=f'assets/{piece.color}{piece.name}.png', priority=1,
+                                      position=self.board.pixel_position(piece.get_position()),
+                                      square_color=self.board.get_square_color(piece.get_position())))
+
+    def update_piece(self, piece):
+        piece.get_label().destroy()
         piece.set_label(self.add_show(url=f'assets/{piece.color}{piece.name}.png', priority=1,
                                       position=self.board.pixel_position(piece.get_position()),
                                       square_color=self.board.get_square_color(piece.get_position())))

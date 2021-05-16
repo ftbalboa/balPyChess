@@ -5,8 +5,9 @@ import pieces
 
 # TODO:         in function "possible moves"
 #                   add al paso threats for pawn
-#               add function move
+#                   add castle
 #               add function eat
+
 
 
 VERSION = 0.001
