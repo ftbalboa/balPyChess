@@ -32,10 +32,10 @@ class Piece:
         self.label = ""
         self.never_move = True
 
-
     def set_position(self, position):
         self.position = position
         self.fancy_position = [ROW_NAMES[self.position[0]], COL_NAMES[self.position[1]]]
+        self.never_move = False
 
     def get_name_color(self):
         """Console prints piece name and color"""
@@ -227,7 +227,8 @@ class Game:
                                 new_mov = (j * a + pos[0], pos[1])
                                 if new_mov[0] < self.board.get_n_rows() and new_mov[1] < self.board.get_n_rows():
                                     if self.board.get_board()[new_mov[0]][new_mov[1]] is not None:
-                                        if self.board.get_board()[new_mov[0]][new_mov[1]].get_color() == piece.get_color():
+                                        if self.board.get_board()[new_mov[0]][
+                                            new_mov[1]].get_color() == piece.get_color():
                                             break
                                         elif 8 > new_mov[0] > -1 and 8 > new_mov[1] > -1:
                                             threats.append(new_mov)
@@ -239,7 +240,8 @@ class Game:
                                 new_mov = (pos[0], pos[1] + j * a)
                                 if new_mov[0] < self.board.get_n_rows() and new_mov[1] < self.board.get_n_rows():
                                     if self.board.get_board()[new_mov[0]][new_mov[1]] is not None:
-                                        if self.board.get_board()[new_mov[0]][new_mov[1]].get_color() == piece.get_color():
+                                        if self.board.get_board()[new_mov[0]][
+                                            new_mov[1]].get_color() == piece.get_color():
                                             break
                                         elif 8 > new_mov[0] > -1 and 8 > new_mov[1] > -1:
                                             threats.append(new_mov)
@@ -257,7 +259,8 @@ class Game:
                                 new_mov = (j * a + pos[0], pos[1] + j)
                                 if new_mov[0] < self.board.get_n_rows() and new_mov[1] < self.board.get_n_rows():
                                     if self.board.get_board()[new_mov[0]][new_mov[1]] is not None:
-                                        if self.board.get_board()[new_mov[0]][new_mov[1]].get_color() == piece.get_color():
+                                        if self.board.get_board()[new_mov[0]][
+                                            new_mov[1]].get_color() == piece.get_color():
                                             break
                                         elif 8 > new_mov[0] > -1 and 8 > new_mov[1] > -1:
                                             threats.append(new_mov)
@@ -269,7 +272,8 @@ class Game:
                                 new_mov = (j * a + pos[0], pos[1] - j)
                                 if new_mov[0] < self.board.get_n_rows() and new_mov[1] < self.board.get_n_rows():
                                     if self.board.get_board()[new_mov[0]][new_mov[1]] is not None:
-                                        if self.board.get_board()[new_mov[0]][new_mov[1]].get_color() == piece.get_color():
+                                        if self.board.get_board()[new_mov[0]][
+                                            new_mov[1]].get_color() == piece.get_color():
                                             break
                                         elif 8 > new_mov[0] > -1 and 8 > new_mov[1] > -1:
                                             threats.append(new_mov)
@@ -287,6 +291,29 @@ class Game:
                                     pass
                                 elif 8 > new_mov[0] > -1 and 8 > new_mov[1] > -1:
                                     forReturn.append(new_mov)
+        # castle
+        if piece.get_name() == 'King':
+            if piece.get_color() == 'white' and piece.get_never_move():
+                # corto
+                if self.board.get_board()[0][5] is None and self.board.get_board()[0][6] is None and \
+                        self.board.get_board()[0][7] is not None:
+                    if self.board.get_board()[0][7].get_never_move:
+                        forReturn.append((0, 6))
+                # largo
+                if self.board.get_board()[0][3] is None and self.board.get_board()[0][2] is None and \
+                        self.board.get_board()[0][1] is None and self.board.get_board()[0][0] is not None:
+                    if self.board.get_board()[0][0].get_never_move:
+                        forReturn.append((0, 2))
+            if piece.get_color() == 'black' and piece.get_never_move():
+                if self.board.get_board()[7][5] is None and self.board.get_board()[7][6] is None and \
+                        self.board.get_board()[7][7] is not None:
+                    if self.board.get_board()[7][7].get_never_move:
+                        forReturn.append((7, 6))
+                # largo
+                if self.board.get_board()[7][3] is None and self.board.get_board()[7][2] is None and \
+                        self.board.get_board()[7][1] is None and self.board.get_board()[7][0] is not None:
+                    if self.board.get_board()[7][0].get_never_move:
+                        forReturn.append((7, 2))
         if mov_or_threat == 'mov':
             return forReturn
         elif mov_or_threat == 'threat':
@@ -313,8 +340,24 @@ class Game:
                 if mov.get_label() is event.widget:
                     piece = self.piece_selected
                     self.deselect_all()
-                    self.board.mov(piece, mov.get_pos())
-                    self.gui.update_piece(piece)
+                    # if castle
+                    if piece.get_name() == 'King' and piece.get_never_move() and (
+                            mov.get_pos() == (0, 6) or mov.get_pos() == (0, 2) or mov.get_pos() == (7, 2) or mov.get_pos() == (7, 6)):
+                        if mov.get_pos()[1] == 6:
+                            self.board.mov(piece, mov.get_pos())
+                            self.gui.update_piece(piece)
+                            rook = self.board.get_board()[mov.get_pos()[0]][7]
+                            self.board.mov(rook, (mov.get_pos()[0], 5))
+                            self.gui.update_piece(rook)
+                        if mov.get_pos()[1] == 2:
+                            self.board.mov(piece, mov.get_pos())
+                            self.gui.update_piece(piece)
+                            rook = self.board.get_board()[mov.get_pos()[0]][0]
+                            self.board.mov(rook, (mov.get_pos()[0], 3))
+                            self.gui.update_piece(rook)
+                    else:
+                        self.board.mov(piece, mov.get_pos())
+                        self.gui.update_piece(piece)
 
     def deselect_all(self):
         self.gui.hide_label(self.select_item.get_label())
